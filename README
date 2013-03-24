@@ -1,0 +1,34 @@
+This is a collection of service directories usable by the s6 supervision suite
+for running services under s6.
+
+	http://skarnet.org/software/s6/
+
+These virtual machines use tap networking. For instructions on setting up
+a bridge network device suitable for backing virtual 'tap' devices, see
+
+	https://wiki.archlinux.org/index.php/Qemu#Tap_networking_with_QEMU
+
+Contained are two service directories to run virtual machines:
+
+vm-use-tapsrv:
+	A VM service directory that relies on the `tapsrv` service contained here
+	do allocate network devices. Requires ucspi-ipc[0] and aq-utils.
+
+vm-use-finish
+	A VM service directory that allocates its own network devices and uses
+	the `finish` script to clean them up. This is the simpler of the two solutions.
+
+The more complex `vm-use-tapsrv` service is included for:
+	- Educational purposes: simple solution to a common dependency problem
+	- Supervision suites that do not have `./finish` functionality, such as the
+	  original daemontools.
+
+I have included run scripts in both bourne shell and execline.
+
+To setup vm services: 
+	# useradd -d /var/empty -s /bin/false qemulog
+	# install -o qemulog -d /var/log/vm/tapsrv
+	# cp -r vm-use-finish /service/vm-foobar
+	# install -o qemulog -d /var/log/vm/foobar
+	# echo -n 'DD:EE:AA:DD:BB:EE' > /service/vm-foobar/env/MAC
+	# echo -n '/path/to/disk.qcow2' > /service/vm-foobar/env/DISK
