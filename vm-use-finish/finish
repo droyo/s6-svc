@@ -1,0 +1,8 @@
+#!/usr/bin/execlineb
+
+s6-envdir ./env
+import tap
+
+foreground { tunctl -d $tap }
+foreground { rm -f ./env/tap }
+foreground { rm -f ./ctl }

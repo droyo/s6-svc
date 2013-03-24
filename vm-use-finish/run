@@ -1,0 +1,30 @@
+#!/usr/bin/execlineb
+
+foreground {
+	redirfd -w 1 ./env/tap
+	tunctl -b -u qemu
+}
+
+fdreserve 1
+s6-envdir ./env
+
+multisubstitute {
+	import MAC
+	import DISK
+	import FD0
+	import tap
+}
+
+foreground { mkfifo -m 660 ctl }
+foreground { chown qemu: ctl }
+
+s6-setuidgid qemu
+redirfd -rnb 0 ctl
+redirfd -wnb $FD0 ctl
+
+qemu-system-x86_64 -enable-kvm
+	-nographic
+	-net "nic,macaddr=${MAC}"
+	-net "tap,ifname=${tap}"
+	-hda "file=${DISK}"
+	-monitor stdio

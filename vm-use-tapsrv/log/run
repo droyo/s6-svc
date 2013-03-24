@@ -1,0 +1,9 @@
+#!/usr/bin/execlineb
+
+backtick -nE pwd { pwd }
+backtick -nE logdir {
+	pipeline { dirname $pwd }
+	sed 's;.*/vm-;/var/log/vm/;'
+}
+
+s6-setuidgid qemulog s6-log -bt n20 s1000000 $logdir

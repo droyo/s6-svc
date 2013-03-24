@@ -1,0 +1,3 @@
+#!/usr/bin/execlineb
+
+s6-setuidgid qemulog s6-log -bt n20 s100000 /var/log/vm/tapsrv

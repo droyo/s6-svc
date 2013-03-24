@@ -1,0 +1,16 @@
+#!/usr/bin/execlineb -P 0
+
+elglob -n vms "$0/vm-*/ctl"
+forx -pE { vms } ctl
+
+backtick -nE vm { dirname $ctl }
+
+foreground {
+	redirfd -nw 1 $1/ctl
+	echo system_powerdown
+}
+
+s6-svwait -t $1 -d $vm
+s6-svc -dx $vm
+
+wait

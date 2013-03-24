@@ -1,0 +1,44 @@
+#!/usr/bin/execlineb
+
+getpid PID
+fdreserve 2
+fdmove -c 1 2
+s6-envdir ./env
+
+multisubstitute {
+	import PID
+	import MAC
+	import DISK
+	import FD0
+	import FD1
+	import FD2
+}
+
+foreground { s6-svwait ../tapsrv }
+foreground { mkfifo -m 660 ctl   }
+foreground { chown qemu: ctl     }
+
+s6-setuidgid qemu
+aq-ipcrun -f $FD0 ../tapsrv/ctl 
+
+foreground {
+	fdmove -c 1 $FD0
+	echo $PID
+}
+
+backtick -nE tap { 
+	fdmove -c 0 $FD0
+	sed 1q
+}
+foreground {
+	echo "Using iface ${tap}"
+}
+
+redirfd -rnb 0 ctl
+redirfd -wnb $FD1 ctl
+
+qemu-system-x86_64 -enable-kvm
+	-net "nic,macaddr=${MAC}"
+	-net "tap,ifname=${tap}"
+	-hda $DISK
+	-monitor stdio

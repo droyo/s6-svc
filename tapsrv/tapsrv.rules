@@ -1,0 +1,4 @@
+# To compile rules list:
+# ipcrules rules.cdb rules.tmp < tapsrv.rules
+qemu.kvm:allow
+:deny

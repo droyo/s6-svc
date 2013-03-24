@@ -1,0 +1,20 @@
+#!/usr/bin/execlineb
+
+fdmove -c 2 1
+ipcserver -x rules.cdb -v ctl
+
+backtick -nE pid { sed 1q }
+backtick -nE net { tunctl -b -u qemu }
+
+foreground { echo $net }
+foreground {
+	fdmove -c 1 2
+	echo "Leased ${net} to ${pid}"
+}
+
+foreground { s6-cat }
+
+foreground {
+	fdmove -c 1 2
+	tunctl -d $net
+}
